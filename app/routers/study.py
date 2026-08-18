@@ -8,7 +8,7 @@ import random
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.database import get_db
 from app.models import Deck, Progress, ProgressBucket, Question, StudySession
@@ -62,7 +62,11 @@ def get_session(session_id: int, db: Session = Depends(get_db)):
 @router.get("/sessions/{session_id}/next", response_model=QuestionOut | None)
 def next_question(session_id: int, db: Session = Depends(get_db)):
     session = _get_session_or_404(db, session_id)
-    questions = db.scalars(select(Question).where(Question.deck_id == session.deck_id)).all()
+    questions = db.scalars(
+        select(Question)
+        .where(Question.deck_id == session.deck_id)
+        .options(selectinload(Question.progress))
+    ).all()
     if not questions:
         return None
 

@@ -1,9 +1,12 @@
 /** Shared helpers used by deck-list.js, quiz.js, flashcards.js, app.js. */
 
+const _HTML_ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+
+// Escapes text for safe interpolation into both HTML text nodes and
+// double-quoted HTML attributes -- callers embed this in `attr="${...}"`
+// throughout quiz.js/authoring.js, so quotes must be escaped too.
 function escapeHtml(str) {
-  const div = document.createElement("div");
-  div.textContent = str == null ? "" : String(str);
-  return div.innerHTML;
+  return (str == null ? "" : String(str)).replace(/[&<>"']/g, (ch) => _HTML_ESCAPES[ch]);
 }
 
 function normalizeAnswer(str) {

@@ -74,6 +74,9 @@ def get_deck(deck_id: int, db: Session = Depends(get_db)):
 def update_deck(deck_id: int, payload: DeckUpdate, db: Session = Depends(get_db)):
     deck = _get_deck_or_404(db, deck_id)
     updates = payload.model_dump(exclude_unset=True)
+    for field in ("slug", "title", "source"):
+        if field in updates and updates[field] is None:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, f"'{field}' cannot be null")
     if "slug" in updates and updates["slug"] != deck.slug and _slug_taken(db, updates["slug"], deck_id):
         raise HTTPException(status.HTTP_409_CONFLICT, f"slug '{updates['slug']}' already exists")
     for field, value in updates.items():
