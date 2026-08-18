@@ -1,20 +1,16 @@
 """SQLAlchemy engine/session setup.
 
-Full env-based configuration (DB path, port, etc.) lands in app/config.py in
-Phase 2 alongside the FastAPI app scaffold. For now this module just exposes
-the declarative Base that app/models.py builds on, plus enough engine/session
-plumbing for models and content validation to be exercised (e.g. in tests)
-without a running app.
+Exposes the declarative Base that app/models.py builds on, plus the
+engine/session plumbing used by the running app (app/main.py), the startup
+seeder (app/seed.py), and tests. DB location comes from app/config.py.
 """
-import os
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./clidrill.db")
+from app.config import settings
 
-connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
-engine = create_engine(DATABASE_URL, connect_args=connect_args)
+connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
+engine = create_engine(settings.database_url, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
