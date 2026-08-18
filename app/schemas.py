@@ -2,14 +2,16 @@
 
 These mirror the ORM shapes in app/models.py for read/write over HTTP.
 Per-type content validation rules (e.g. multiple_choice needs >=2 choices)
-live in app/content_validation.py, not here -- routers.py (Phase 2) wires
-that module in for create/update payloads so the API and the content-seed
-path share one set of rules.
+live in app/content_validation.py: app/routers/decks.py uses
+content_validation.QuestionIn directly as the question create/update body,
+so hand-authored deck files and API-authored content share one set of
+rules. Deck slugs reuse content_validation.SLUG_RE for the same reason.
 """
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.content_validation import SLUG_RE
 from app.models import DeckSource, ProgressBucket, QuestionSource, QuestionType
 
 
@@ -42,6 +44,51 @@ class DeckOut(BaseModel):
 
 class DeckWithQuestionsOut(DeckOut):
     questions: list[QuestionOut] = []
+
+
+def _validate_slug(v: str) -> str:
+    if not SLUG_RE.match(v):
+        raise ValueError(
+            "'slug' must be lowercase alphanumeric words separated by single hyphens"
+        )
+    return v
+
+
+class DeckCreate(BaseModel):
+    slug: str = Field(min_length=1)
+    title: str = Field(min_length=1)
+    description: str | None = None
+    source: DeckSource = DeckSource.AUTHORED
+
+    _check_slug = field_validator("slug")(_validate_slug)
+
+
+class DeckUpdate(BaseModel):
+    slug: str | None = Field(default=None, min_length=1)
+    title: str | None = Field(default=None, min_length=1)
+    description: str | None = None
+    source: DeckSource | None = None
+
+    @field_validator("slug")
+    @classmethod
+    def _check_slug(cls, v: str | None) -> str | None:
+        return _validate_slug(v) if v is not None else v
+
+
+class QuestionUpdate(BaseModel):
+    """Partial update payload for a question. Fields left unset are kept as
+    on the existing row; the router merges this onto the current question
+    and re-validates the result through content_validation.QuestionIn so
+    per-type rules can't be violated by a partial edit."""
+
+    type: QuestionType | None = None
+    prompt: str | None = Field(default=None, min_length=1)
+    answer: str | None = Field(default=None, min_length=1)
+    choices: list[str] | None = None
+    example: str | None = None
+    tags: list[str] | None = None
+    source: QuestionSource | None = None
+    raw_excerpt: str | None = None
 
 
 class ProgressOut(BaseModel):
