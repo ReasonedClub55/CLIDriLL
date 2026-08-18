@@ -16,8 +16,9 @@ venv/
 # Node (only if the v2 static server ends up using it)
 node_modules/
 
-# v2 build output — generated at Docker image build time, not hand-authored
-v2/app/generated-items.json
-
 # Logs
 *.log
+
+# SQLite database (persisted via named Docker volume at runtime, not committed)
+*.db
+*.db-journal
