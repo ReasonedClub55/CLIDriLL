@@ -7,12 +7,20 @@ async function renderDeckList(container) {
   container.innerHTML = `
     <div class="page-header">
       <h1>Decks</h1>
-      <button type="button" class="button" id="new-deck-toggle">+ New deck</button>
+      <div class="page-header-actions">
+        <label class="button secondary file-button">
+          Import JSON
+          <input type="file" id="import-deck-file" accept="application/json" hidden />
+        </label>
+        <button type="button" class="button" id="new-deck-toggle">+ New deck</button>
+      </div>
     </div>
+    <p class="form-feedback" id="import-feedback"></p>
     ${newDeckFormHtml()}
     ${decks.length ? `<div class="deck-grid">${decks.map(deckCardHtml).join("")}</div>` : "<p>No decks yet.</p>"}
   `;
   wireDeckListHandlers(container);
+  wireImportHandler(container);
 }
 
 function newDeckFormHtml() {
@@ -82,5 +90,57 @@ function wireDeckListHandlers(container) {
       feedback.textContent = err.message;
       feedback.className = "form-feedback wrong";
     }
+  });
+}
+
+// Imports a content/decks/<slug>.json-shaped file (same shape
+// exportDeckJson in authoring.js produces): POSTs the deck, then each
+// question, one at a time. Deliberately does not pre-validate the parsed
+// JSON's shape client-side -- POST /api/decks(/questions) already runs it
+// through content_validation, and duplicating that here would violate
+// plan.md §7's one-place-owns-the-rules design. A failure partway through
+// (e.g. one bad question) leaves the deck and whatever questions already
+// succeeded in place rather than rolling back -- the editor page is where
+// to fix or remove them.
+function wireImportHandler(container) {
+  const input = container.querySelector("#import-deck-file");
+  const feedback = container.querySelector("#import-feedback");
+
+  input.addEventListener("change", async () => {
+    const file = input.files[0];
+    if (!file) return;
+    feedback.textContent = "Importing…";
+    feedback.className = "form-feedback";
+
+    let result;
+    try {
+      const data = JSON.parse(await file.text());
+      const deck = await api.createDeck({
+        slug: data.slug,
+        title: data.title,
+        description: data.description ?? null,
+        source: data.source ?? "authored",
+      });
+      const questions = Array.isArray(data.questions) ? data.questions : [];
+      let added = 0;
+      for (const question of questions) {
+        await api.createQuestion(deck.id, question);
+        added += 1;
+      }
+      result = {
+        text: `Imported "${deck.title}" with ${added}/${questions.length} question(s).`,
+        className: "form-feedback correct",
+      };
+    } catch (err) {
+      result = { text: `Import failed: ${err.message}`, className: "form-feedback wrong" };
+    }
+
+    // Re-render to pick up any deck/questions the import created (even on
+    // a partial failure), then show the result in the freshly-rendered
+    // feedback element -- innerHTML above already replaced the old one.
+    await renderDeckList(container);
+    const newFeedback = container.querySelector("#import-feedback");
+    newFeedback.textContent = result.text;
+    newFeedback.className = result.className;
   });
 }

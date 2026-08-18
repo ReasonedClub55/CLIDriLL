@@ -25,6 +25,7 @@ function renderEditor(container, state) {
       <label>Description <textarea id="deck-description">${escapeHtml(deck.description || "")}</textarea></label>
       <div class="form-actions">
         <button type="submit" class="button">Save deck</button>
+        <button type="button" class="button secondary" id="export-deck">Export JSON</button>
         <button type="button" class="button danger" id="delete-deck">Delete deck</button>
       </div>
       <p class="form-feedback" id="deck-feedback"></p>
@@ -118,6 +119,10 @@ function wireEditorHandlers(container, state) {
     }
   });
 
+  container.querySelector("#export-deck").addEventListener("click", () => {
+    exportDeckJson(state.deck);
+  });
+
   container.querySelector("#delete-deck").addEventListener("click", async () => {
     if (!confirm(`Delete "${state.deck.title}" and all its questions? This can't be undone.`)) return;
     await api.deleteDeck(state.deck.id);
@@ -194,6 +199,39 @@ function wireChoiceRemoveButtons(choicesList) {
       if (choicesList.children.length > 1) btn.closest(".q-choice-item").remove();
     };
   });
+}
+
+// Exports in exactly the content/decks/<slug>.json shape (see
+// content_validation.DeckFile / plan.md §7) -- id/deck_id/timestamps
+// stripped -- so the file can be dropped straight into content/decks/ or
+// re-imported via deck-list.js's Import JSON control.
+function exportDeckJson(deck) {
+  const payload = {
+    slug: deck.slug,
+    title: deck.title,
+    description: deck.description || null,
+    source: deck.source,
+    questions: deck.questions.map((q) => ({
+      type: q.type,
+      prompt: q.prompt,
+      answer: q.answer,
+      choices: q.choices || null,
+      example: q.example || null,
+      tags: q.tags || null,
+      source: q.source || null,
+      raw_excerpt: q.raw_excerpt || null,
+    })),
+  };
+
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${deck.slug}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 function readQuestionForm(form) {
