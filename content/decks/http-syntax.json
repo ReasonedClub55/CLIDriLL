@@ -1,0 +1,226 @@
+{
+  "slug": "http-syntax",
+  "title": "HTTP Syntax",
+  "description": "HTTP methods, status codes, and headers.",
+  "source": "ported",
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "prompt": "Which HTTP method requests a resource's representation without modifying it, and is safe/idempotent?",
+      "answer": "GET",
+      "choices": ["GET", "POST", "PUT", "PATCH"],
+      "tags": ["methods"],
+      "source": "hand"
+    },
+    {
+      "type": "multiple_choice",
+      "prompt": "Which HTTP method submits data to be processed, typically creating a new resource, and is neither safe nor idempotent?",
+      "answer": "POST",
+      "choices": ["POST", "GET", "HEAD", "OPTIONS"],
+      "tags": ["methods"],
+      "source": "hand"
+    },
+    {
+      "type": "multiple_choice",
+      "prompt": "Which HTTP method replaces a resource entirely with the supplied representation, and is idempotent?",
+      "answer": "PUT",
+      "choices": ["PUT", "POST", "PATCH", "DELETE"],
+      "tags": ["methods"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Which HTTP method applies a partial modification to a resource?",
+      "answer": "PATCH",
+      "tags": ["methods"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Which HTTP method removes the specified resource?",
+      "answer": "DELETE",
+      "tags": ["methods"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Which HTTP method returns only headers for a resource, identical to GET but without a response body?",
+      "answer": "HEAD",
+      "tags": ["methods"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Which HTTP method asks what communication options / methods are supported for a resource?",
+      "answer": "OPTIONS",
+      "tags": ["methods"],
+      "source": "hand"
+    },
+    {
+      "type": "multiple_choice",
+      "prompt": "What does HTTP status code 200 mean?",
+      "answer": "OK",
+      "choices": ["OK", "Created", "No Content", "Accepted"],
+      "tags": ["status-codes", "2xx"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "What does HTTP status code 201 mean?",
+      "answer": "Created",
+      "tags": ["status-codes", "2xx"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "What does HTTP status code 204 mean?",
+      "answer": "No Content",
+      "tags": ["status-codes", "2xx"],
+      "source": "hand"
+    },
+    {
+      "type": "multiple_choice",
+      "prompt": "What does HTTP status code 301 mean?",
+      "answer": "Moved Permanently",
+      "choices": ["Moved Permanently", "Found", "Not Modified", "See Other"],
+      "tags": ["status-codes", "3xx"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "What does HTTP status code 302 mean?",
+      "answer": "Found",
+      "tags": ["status-codes", "3xx"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "What does HTTP status code 304 mean?",
+      "answer": "Not Modified",
+      "tags": ["status-codes", "3xx"],
+      "source": "hand"
+    },
+    {
+      "type": "multiple_choice",
+      "prompt": "What does HTTP status code 400 mean?",
+      "answer": "Bad Request",
+      "choices": ["Bad Request", "Unauthorized", "Forbidden", "Not Found"],
+      "tags": ["status-codes", "4xx"],
+      "source": "hand"
+    },
+    {
+      "type": "multiple_choice",
+      "prompt": "What does HTTP status code 401 mean?",
+      "answer": "Unauthorized",
+      "choices": ["Unauthorized", "Forbidden", "Bad Request", "Not Found"],
+      "tags": ["status-codes", "4xx"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "What does HTTP status code 403 mean?",
+      "answer": "Forbidden",
+      "tags": ["status-codes", "4xx"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "What does HTTP status code 404 mean?",
+      "answer": "Not Found",
+      "tags": ["status-codes", "4xx"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "What does HTTP status code 405 mean?",
+      "answer": "Method Not Allowed",
+      "tags": ["status-codes", "4xx"],
+      "source": "hand"
+    },
+    {
+      "type": "multiple_choice",
+      "prompt": "What does HTTP status code 500 mean?",
+      "answer": "Internal Server Error",
+      "choices": ["Internal Server Error", "Bad Gateway", "Service Unavailable", "Not Implemented"],
+      "tags": ["status-codes", "5xx"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "What does HTTP status code 502 mean?",
+      "answer": "Bad Gateway",
+      "tags": ["status-codes", "5xx"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "What does HTTP status code 503 mean?",
+      "answer": "Service Unavailable",
+      "tags": ["status-codes", "5xx"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Which request header specifies the media type of the request body?",
+      "answer": "Content-Type",
+      "tags": ["headers"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Which request header carries credentials for authenticating with a server (e.g. 'Bearer <token>')?",
+      "answer": "Authorization",
+      "tags": ["headers", "auth"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Which request header specifies the domain name (and optionally port) of the server, required in HTTP/1.1?",
+      "answer": "Host",
+      "tags": ["headers"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Which response header, sent with a 3xx redirect, tells the client where to go next?",
+      "answer": "Location",
+      "tags": ["headers"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Which response header instructs the client to store a cookie?",
+      "answer": "Set-Cookie",
+      "tags": ["headers", "cookies"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Which header indicates the size, in bytes, of the request or response body?",
+      "answer": "Content-Length",
+      "tags": ["headers"],
+      "source": "hand"
+    },
+    {
+      "type": "free_response",
+      "prompt": "Write the request line (method, path, and HTTP version) for a GET request to /api/users using HTTP/1.1.",
+      "answer": "GET /api/users HTTP/1.1",
+      "tags": ["scenario", "request-line"],
+      "source": "hand"
+    },
+    {
+      "type": "free_response",
+      "prompt": "Write the status line for a successful response using HTTP/1.1.",
+      "answer": "HTTP/1.1 200 OK",
+      "tags": ["scenario", "status-line"],
+      "source": "hand"
+    },
+    {
+      "type": "free_response",
+      "prompt": "A client submits a login form. Which status code should the server return on success if it redirects the browser to a dashboard page, and what header must accompany it?",
+      "answer": "302 Found (or 303 See Other), with a Location header pointing to the dashboard URL",
+      "tags": ["scenario"],
+      "source": "hand"
+    }
+  ]
+}
