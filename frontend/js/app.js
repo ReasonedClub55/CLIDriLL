@@ -9,10 +9,14 @@ function parseRoute() {
 }
 
 async function router() {
-  const [view, id] = parseRoute();
+  const [view, id, sub] = parseRoute();
   try {
     if (!view || view === "decks") {
-      await renderDeckList(appEl);
+      if (id && sub === "edit") {
+        await renderDeckEditor(appEl, Number(id));
+      } else {
+        await renderDeckList(appEl);
+      }
     } else if (view === "study" && id) {
       await renderQuiz(appEl, Number(id));
     } else if (view === "flashcards" && id) {

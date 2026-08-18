@@ -25,6 +25,23 @@ async function apiRequest(path, options = {}) {
 const api = {
   listDecks: () => apiRequest("/decks"),
   getDeck: (deckId) => apiRequest(`/decks/${deckId}`),
+  createDeck: (payload) =>
+    apiRequest("/decks", { method: "POST", body: JSON.stringify(payload) }),
+  updateDeck: (deckId, payload) =>
+    apiRequest(`/decks/${deckId}`, { method: "PATCH", body: JSON.stringify(payload) }),
+  deleteDeck: (deckId) => apiRequest(`/decks/${deckId}`, { method: "DELETE" }),
+  createQuestion: (deckId, payload) =>
+    apiRequest(`/decks/${deckId}/questions`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  updateQuestion: (deckId, questionId, payload) =>
+    apiRequest(`/decks/${deckId}/questions/${questionId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+  deleteQuestion: (deckId, questionId) =>
+    apiRequest(`/decks/${deckId}/questions/${questionId}`, { method: "DELETE" }),
   startSession: (deckId) =>
     apiRequest("/study/sessions", {
       method: "POST",
