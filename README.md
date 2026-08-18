@@ -1,6 +1,13 @@
 # CLIDriLL — Command Line Interface Drilling Linux Library
 
-CLIDriLL is a small, local study tool for drilling CLI flags, multi-flag command construction, and raw HTTP syntax until they stick. It exists in two complementary flavors: a minimalist "drop-in the HTML" edition (v1) for instant local use, and a Dockerized edition (v2) that auto-generates content from real man pages at build time for higher accuracy.
+CLIDriLL is a small, local study tool for drilling CLI flags, multi-flag command construction, and raw HTTP syntax until they stick.
+
+> **Note:** This repo is mid-pivot to v3, a generic Quizlet-style study engine
+> (FastAPI + SQLite) described in [`plan.md`](plan.md). The v1 (plain HTML)
+> and v2 (Dockerized, man-page-sourced) editions described below were never
+> fully implemented and have been archived under
+> [`docs/archive/`](docs/archive/) for reference. This README will be rewritten
+> for v3 in a later phase (see `plan.md` §9, Phase 4).
 
 Why this exists: when you use security tooling daily you still forget exact flags, flag combinations, and HTTP request/response syntax. CLIDriLL quizzes you (self-graded) and weights missed items to repeat weak spots — no accounts, no external services, and no internet access required at runtime.
 
@@ -169,8 +176,9 @@ docker compose up
 ---
 
 ## Project docs
-- [`docs/prd-v1-html.md`](docs/prd-v1-html.md) — PRD for the v1 plain-HTML edition.
-- [`docs/prd-v2-docker.md`](docs/prd-v2-docker.md) — PRD for the v2 Dockerized, man-page-sourced edition.
+- [`docs/archive/prd-v1-html.md`](docs/archive/prd-v1-html.md) — PRD for the v1 plain-HTML edition (archived).
+- [`docs/archive/prd-v2-docker.md`](docs/archive/prd-v2-docker.md) — PRD for the v2 Dockerized, man-page-sourced edition (archived).
+- [`plan.md`](plan.md) — v3 development plan (current).
 
 ## License
 This repository includes a LICENSE file. See LICENSE for details.
