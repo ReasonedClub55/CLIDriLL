@@ -1,0 +1,13 @@
+services:
+  clidrill:
+    build: .
+    # Host binding stays on 127.0.0.1 per plan.md's local-first, no-LAN-exposure
+    # requirement; override the host port with CLIDRILL_PORT if 8080 is taken.
+    ports:
+      - "127.0.0.1:${CLIDRILL_PORT:-8080}:8080"
+    volumes:
+      - clidrill-data:/data
+    restart: unless-stopped
+
+volumes:
+  clidrill-data:

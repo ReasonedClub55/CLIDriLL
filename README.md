@@ -1,184 +1,157 @@
-# CLIDriLL — Command Line Interface Drilling Linux Library
+# CLIDriLL — a small, local Quizlet-style study app
 
-CLIDriLL is a small, local study tool for drilling CLI flags, multi-flag command construction, and raw HTTP syntax until they stick.
+CLIDriLL is a local-first study app: pick a deck, study it via quiz mode
+(multiple choice, short answer, or self-graded free response) or flashcards,
+and let missed items reappear more often until they stick. It runs as a
+single Docker container on your own machine — no accounts, no cloud, no
+internet access needed at runtime.
 
-> **Note:** This repo is mid-pivot to v3, a generic Quizlet-style study engine
-> (FastAPI + SQLite) described in [`plan.md`](plan.md). The v1 (plain HTML)
-> and v2 (Dockerized, man-page-sourced) editions described below were never
-> fully implemented and have been archived under
-> [`docs/archive/`](docs/archive/) for reference. This README will be rewritten
-> for v3 in a later phase (see `plan.md` §9, Phase 4).
-
-Why this exists: when you use security tooling daily you still forget exact flags, flag combinations, and HTTP request/response syntax. CLIDriLL quizzes you (self-graded) and weights missed items to repeat weak spots — no accounts, no external services, and no internet access required at runtime.
-
----
-
-## Quick highlights
-- Drill CLI flags and HTTP syntax with flashcards and self-graded quizzes.
-- Two editions:
-  - v1: Plain HTML + `data.js` — instant, no build, open `index.html` in a browser.
-  - v2: Dockerized — man-page-sourced content generated at image build time.
-- Spaced-repetition-like missed-item weighting (simple Leitner-style buckets).
-- Local progress persistence via `localStorage` (or optional named Docker volume in v2).
-- Single-user, local-first design bound to `127.0.0.1`.
+The app ships with one deck ported from CLIDriLL's original purpose (drilling
+`curl`/`nmap` flags and raw HTTP syntax), but the engine itself is generic:
+any subject can be a deck.
 
 ---
 
-## Editions / How it works
+## Quick start
 
-### v1 — Simple local HTML edition
-- Tech: Plain HTML + vanilla JavaScript. No bundler, no server required.
-- Files:
-  - `index.html` — UI + quiz engine + styles
-  - `data.js` — `DRILL_ITEMS` array (hand-authored seed items)
-- Run:
-  - Clone the repo and double-click `index.html` (open via `file://`) or open it in your browser.
-  - The app loads `data.js` via a script tag (no fetch() calls, so it works without a server).
-- Ideal when you want an ultralight, editable starting point and to add items by hand.
-
-### v2 — Dockerized man-page-sourced edition
-- Purpose: Generate quiz content from the real tools' man pages (or `--help` fallback) and serve a static quiz UI from a container.
-- Key idea: parse man pages at image build time into `generated-items.json`, bake it into the image, and serve static files at runtime — no runtime network access or parsing.
-- Components:
-  - `Dockerfile` — installs man-db + selected tools and runs the generator at build time.
-  - `docker-compose.yml` — single service bound to `127.0.0.1:<port>` → 8080 in container.
-  - `build/generate_items.py` — parses man pages / `--help` into structured JSON.
-  - `app/` — `index.html`, `app.js`, `curated-scenarios.js`, `generated-items.json` (output).
-  - Minimal static server (Python http.server or tiny Express) to serve the pre-generated files.
-- Run (example):
-  - Ensure Docker Desktop is set to Linux containers (WSL2) — required on Windows 11.
-  - Build & run:
-    - docker compose up --build
-  - Open: http://127.0.0.1:<port> (compose binds host port → 8080 inside container)
-  - Stop:
-    - docker compose down
-- Notes:
-  - The generator favors `man <tool>` output; if missing, it falls back to `<tool> --help` (including subcommand `--help` for multi-command tools).
-  - Base image suggestion: `kalilinux/kali-rolling` (many security tools ship man pages there).
-  - To refresh content after adding tools: edit the generator config/tool list and rebuild with `docker compose build --no-cache`.
-
----
-
-## Data model (how drill items are represented)
-Every item is an object with at least: `id`, `tool`, `category`, `prompt`, `answer`.
-Optional fields: `example`, `tags`, `source`, `raw_excerpt`.
-
-Example (hand-authored):
-```js
-{
-  id: "curl-001",
-  tool: "curl",
-  category: "flag", // "flag" | "scenario" | "http-syntax"
-  prompt: "Flag to follow HTTP redirects",
-  answer: "-L, --location",
-  example: "curl -L https://example.com",
-  tags: ["redirects", "basics"]
-}
-```
-
-Example (generated from man page; generator includes source info):
-```json
-{
-  "id": "nmap-sS",
-  "tool": "nmap",
-  "category": "flag",
-  "flag": "-sS",
-  "prompt": "TCP SYN scan — description as parsed from the man page",
-  "answer": "-sS",
-  "source": "man",
-  "raw_excerpt": "the original paragraph, for double-checking accuracy"
-}
-```
-
-v1 seed data is a single `DRILL_ITEMS` array (edit `data.js`). v2 produces `app/generated-items.json` and merges it at load time with `curated-scenarios.js`.
-
----
-
-## Features
-P0 (must-have)
-- Quiz mode: prompt shown, reveal answer, self-grade pass/fail (no brittle exact string matching).
-- Flashcard/browse mode.
-- Filter by tool and category.
-- Leitner-style missed-item weighting (new / learning / known).
-- Progress persisted via `localStorage`.
-- Session summary with counts and items-to-revisit.
-
-P1 (nice-to-have)
-- Toggle quiz direction (flag → description vs description → flag).
-- Source indicator for generated items (man vs `--help`).
-- Optional named Docker volume for progress backup (only if needed).
-
-Out of scope
-- Runtime internet access
-- Executing the real tools from the quiz (we only need their man pages)
-- Multi-user or cloud sync
-
----
-
-## Initial content scope
-- Seed items for v1: ~20–25 core `curl` flags, ~20–25 `nmap` flags, plus HTTP syntax items and 5–10 scenarios.
-- v2 initial tool list: `curl`, `nmap`, `hydra`, `docker` (CLI), `gobuster`, `netcat`, `tcpdump`, `smbclient`, `hashcat`.
-- The design makes adding tools one-line changes to the generator config + rebuild.
-
----
-
-## Development & contributor notes
-- v1 goal: keep the app tiny and easy to edit. Add items by editing `data.js`.
-- v2 goal: generator does heavy lifting at build time. Check `generated-items.json` after the first build and spot-check a few entries (man pages are semi-structured and parser heuristics may produce some imperfect entries).
-- If a tool's man page is missing or poor, the generator falls back to `--help` output and records the `source` for trust signals.
-- Windows note: Docker Desktop must be in Linux containers mode (WSL2). Bind the compose service to `127.0.0.1` to avoid exposing services on the LAN.
-
----
-
-## Acceptance criteria (from PRD)
-- [ ] `docker compose up --build` produces a working container with no network access needed after image build.
-- [ ] Visiting `http://127.0.0.1:<port>` shows a quiz drawing from all configured tools plus curated scenarios.
-- [ ] `generated-items.json` contains flag text traceable to actual man pages (or `--help`).
-- [ ] Wrong answers reappear more often within and across sessions.
-- [ ] Adding a new tool is one line in the generator's list + rebuild.
-- [ ] Adding a curated scenario is one object in `curated-scenarios.js`.
-
----
-
-## Example commands
-
-v1 — open locally (no server):
-- Double-click `index.html` or open it from your browser (file://)
-
-v2 — Dockerized build & run:
 ```bash
-# build and run (compose binds host port to container)
 docker compose up --build
+```
 
-# stop
+Open http://127.0.0.1:8080. That's it — the app seeds its three starter
+decks (`curl`, `nmap`, `HTTP Syntax`) into a SQLite database on first boot.
+
+Stop it with:
+
+```bash
 docker compose down
 ```
 
-If you change the tool list or want a fresh parse:
+Progress and any decks you add or edit survive `docker compose down` and
+rebuilds — they live in a named Docker volume (`clidrill-data`), not inside
+the container. If port 8080 is taken on your machine, set `CLIDRILL_PORT`:
+
 ```bash
-docker compose build --no-cache
-docker compose up
+CLIDRILL_PORT=8090 docker compose up --build
 ```
 
+The container binds to `127.0.0.1` only — it's not reachable from other
+devices on your network.
+
+## Running without Docker (development)
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8080
+```
+
+This uses the same `app/`, `content/`, and `frontend/` code as the container;
+`DATABASE_URL` defaults to a local `./clidrill.db` file (see `app/config.py`
+for all env vars: `DATABASE_URL`, `HOST`, `PORT`, `CONTENT_DECKS_DIR`,
+`FRONTEND_DIR`).
+
 ---
 
-## How to add/extend content
-- v1: edit `data.js` and add one object per drill item.
-- v2: add the tool name to the generator's tool-list, rebuild the image, and verify `generated-items.json`; add curated scenarios in `app/curated-scenarios.js`.
+## How it works
 
----
+- **Deck list** (`#/decks`) — every deck loaded from `content/decks/*.json`
+  (plus any created through the API), with Study and Flashcards actions.
+- **Quiz mode** (`#/study/:id`) — pulls questions one at a time, weighted so
+  items you've missed (`learning` bucket) or never seen (`new`) come up more
+  than ones you've gotten right repeatedly (`known`) — a simple Leitner
+  scheme. Each question type is graded differently:
+  - `multiple_choice` — click a choice, auto-graded against the answer.
+  - `short_answer` — type an answer, auto-graded after normalizing
+    (trim, lowercase, collapse whitespace) — good for a single flag or
+    command name.
+  - `free_response` — reveal the answer yourself and self-grade
+    Pass/Fail — used for scenario/command-construction items where exact
+    string matching would be too brittle.
 
-## UX notes
-- Single-page, keyboard-friendly: space/enter to reveal, 1/2 or keys to grade pass/fail.
-- Big central quiz card; filters and mode toggles on top.
-- Fast to open and start drilling — no setup screens.
+  Every grading result is reported to the server, which owns progress state;
+  the frontend only decides correct/incorrect for display.
+- **Flashcards** (`#/flashcards/:id`) — read-only click-to-flip browsing
+  through a deck's questions, no grading or progress writes.
+- **Session summary** — ending a quiz session (or running out of questions)
+  shows correct/wrong counts and accuracy for that session.
 
----
+## Adding a new deck
+
+Drop a new validated JSON file into `content/decks/` and restart the
+container (or rerun `app/seed.py`'s startup path) — no code changes needed.
+Validate it first:
+
+```bash
+python scripts/validate_content.py
+```
+
+This runs the same validation (`app/content_validation.py`) that gates
+content at seed time and every deck/question write through the API, so a
+malformed file is caught before it ever reaches the app. See `plan.md` §5–7
+for the deck/question JSON shape and per-type rules (e.g. `multiple_choice`
+needs ≥2 `choices` including the answer; `short_answer`/`free_response` must
+not have `choices`).
+
+## API
+
+The frontend only talks to the backend through this JSON API — it never
+touches the database or duplicates validation logic itself.
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/decks` | List decks |
+| `POST /api/decks` | Create a deck |
+| `GET /api/decks/{id}` | Deck + its questions |
+| `PATCH /api/decks/{id}` / `DELETE /api/decks/{id}` | Edit / delete a deck |
+| `POST /api/decks/{id}/questions` | Add a question to a deck |
+| `PATCH /api/decks/{deck_id}/questions/{id}` / `DELETE ...` | Edit / delete a question |
+| `POST /api/study/sessions` | Start a study session for a deck |
+| `GET /api/study/sessions/{id}/next` | Next Leitner-weighted question |
+| `POST /api/study/sessions/{id}/answer` | Submit a grading result, update progress |
+| `POST /api/study/sessions/{id}/finish` | End the session |
+| `GET /api/study/sessions/{id}` | Session state (for the summary screen) |
+
+## Architecture
+
+```
+app/                # FastAPI backend
+├── main.py          # app factory: startup (create tables + seed), routers, static frontend mount
+├── config.py         # env-based settings (DATABASE_URL, HOST, PORT, content/frontend paths)
+├── database.py        # SQLAlchemy engine/session
+├── models.py           # Deck, Question, Progress, StudySession
+├── schemas.py            # Pydantic API request/response schemas
+├── content_validation.py  # the one place that knows what a valid deck/question looks like
+├── seed.py                 # loads content/decks/*.json on first boot
+└── routers/
+    ├── decks.py             # deck/question CRUD
+    └── study.py               # study sessions: next question, submit answer, finish
+
+content/decks/*.json  # deck content (hand-authored or API-authored)
+frontend/              # static HTML/CSS/JS, no build step, served by FastAPI
+scripts/validate_content.py  # CLI: validate content/decks/*.json without starting the app
+tests/                  # pytest suite (content validation, API, seeding)
+```
+
+Single implicit local user — no accounts or auth. Every table is shaped so
+adding a `user_id` column later (for multi-user) would be additive, not a
+rewrite; swapping SQLite for Postgres is a `DATABASE_URL` change, not a code
+change. See `plan.md` for the full design rationale and the milestone plan
+this app was built against.
+
+## Development
+
+```bash
+pytest tests/                    # backend test suite
+python scripts/validate_content.py  # validate deck content files
+```
 
 ## Project docs
-- [`docs/archive/prd-v1-html.md`](docs/archive/prd-v1-html.md) — PRD for the v1 plain-HTML edition (archived).
-- [`docs/archive/prd-v2-docker.md`](docs/archive/prd-v2-docker.md) — PRD for the v2 Dockerized, man-page-sourced edition (archived).
-- [`plan.md`](plan.md) — v3 development plan (current).
+- [`plan.md`](plan.md) — the v3 development plan (architecture, data model,
+  milestones, acceptance criteria) this app was built against.
+- [`docs/archive/`](docs/archive/) — PRDs and stub folders for CLIDriLL's
+  original two editions (v1: static HTML, v2: Docker + man-page-generated
+  content), both superseded by this app and kept for history.
 
 ## License
 This repository includes a LICENSE file. See LICENSE for details.

@@ -1,0 +1,15 @@
+.git/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+tests/
+docs/
+*.db
+*.db-journal
+*.log
+.editorconfig
+.gitignore
+plan.md
+Screenshot*.png

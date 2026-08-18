@@ -179,10 +179,21 @@ a working v3, `P1`/`P2` = stretch).
 16. Deck export/import as JSON (P2)
 
 ## 10. Acceptance criteria (v3 "done")
-- [ ] `docker compose up --build` serves a working app at `http://127.0.0.1:<port>` with no runtime network access needed.
-- [ ] Deck list shows the ported curl/nmap/HTTP-syntax decks.
-- [ ] A deck can be studied in quiz mode using all three question types, and in flashcard mode.
-- [ ] Wrong answers reappear more often (Leitner buckets), and progress survives a container restart.
-- [ ] `python scripts/validate_content.py` catches a malformed deck file before it reaches the app.
-- [ ] Adding a new deck = dropping one validated JSON file in `content/decks/` (no code changes).
-- [ ] No validation logic exists in `frontend/js/*` or inline in HTML — it's all in `app/content_validation.py`.
+- [x] `docker compose up --build` serves a working app at `http://127.0.0.1:<port>` with no runtime network access needed.
+- [x] Deck list shows the ported curl/nmap/HTTP-syntax decks.
+- [x] A deck can be studied in quiz mode using all three question types, and in flashcard mode.
+- [x] Wrong answers reappear more often (Leitner buckets), and progress survives a container restart.
+- [x] `python scripts/validate_content.py` catches a malformed deck file before it reaches the app.
+- [x] Adding a new deck = dropping one validated JSON file in `content/decks/` (no code changes).
+- [x] No validation logic exists in `frontend/js/*` or inline in HTML — it's all in `app/content_validation.py`.
+
+All seven verified end-to-end against a real `docker compose up --build`
+run in Phase 4 (issue 13): deck list/detail, a full quiz session across all
+three question types plus session finish, and a `down`+`up` cycle showing no
+re-seed and identical deck rows (volume persistence) — all via the running
+container's API, plus `pytest tests/` (26/26) and
+`python scripts/validate_content.py` (3/3 decks). "No validation logic in
+frontend/js/*" verified by inspection: `content_validation.py` is the only
+file with per-type schema rules (multiple_choice choice counts, etc.);
+frontend/js/util.js's `normalizeAnswer` is answer-matching for grading, not
+schema validation.
