@@ -1,0 +1,195 @@
+{
+  "slug": "curl",
+  "title": "curl",
+  "description": "Core curl flags, options, and command construction.",
+  "source": "ported",
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "prompt": "Which flag makes curl follow HTTP redirects (3xx responses)?",
+      "answer": "-L, --location",
+      "choices": ["-L, --location", "-o, --output", "-I, --head", "-v, --verbose"],
+      "example": "curl -L https://example.com",
+      "tags": ["redirects", "basics"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to write the response body to a file with a name you choose.",
+      "answer": "-o",
+      "example": "curl -o page.html https://example.com",
+      "tags": ["output"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to save the response body using the remote file's own name.",
+      "answer": "-O",
+      "example": "curl -O https://example.com/file.zip",
+      "tags": ["output"],
+      "source": "hand"
+    },
+    {
+      "type": "multiple_choice",
+      "prompt": "Which flag sends a HEAD request instead of GET, fetching only headers?",
+      "answer": "-I, --head",
+      "choices": ["-I, --head", "-X HEAD", "-H", "-i, --include"],
+      "example": "curl -I https://example.com",
+      "tags": ["http-methods"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to explicitly set the HTTP request method (e.g. POST, PUT, DELETE).",
+      "answer": "-X",
+      "example": "curl -X POST https://example.com/api",
+      "tags": ["http-methods"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to send data in the request body (implies a POST unless -X overrides it).",
+      "answer": "-d",
+      "example": "curl -d 'name=value' https://example.com/api",
+      "tags": ["data", "post"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to add a custom HTTP header to the request.",
+      "answer": "-H",
+      "example": "curl -H 'Content-Type: application/json' https://example.com",
+      "tags": ["headers"],
+      "source": "hand"
+    },
+    {
+      "type": "multiple_choice",
+      "prompt": "Which flag supplies HTTP basic auth credentials as user:password?",
+      "answer": "-u, --user",
+      "choices": ["-u, --user", "-b, --cookie", "-A, --user-agent", "-e, --referer"],
+      "example": "curl -u alice:secret https://example.com",
+      "tags": ["auth"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag that prints detailed request/response info for debugging.",
+      "answer": "-v",
+      "example": "curl -v https://example.com",
+      "tags": ["debugging"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to suppress the progress meter and error messages (silent mode).",
+      "answer": "-s",
+      "example": "curl -s https://example.com",
+      "tags": ["output"],
+      "source": "hand"
+    },
+    {
+      "type": "multiple_choice",
+      "prompt": "Which flag skips TLS certificate verification (useful for self-signed certs, insecure)?",
+      "answer": "-k, --insecure",
+      "choices": ["-k, --insecure", "-s, --silent", "-L, --location", "-v, --verbose"],
+      "example": "curl -k https://self-signed.example.com",
+      "tags": ["tls"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to set a custom User-Agent header.",
+      "answer": "-A",
+      "example": "curl -A 'MyClient/1.0' https://example.com",
+      "tags": ["headers"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to send a cookie string with the request.",
+      "answer": "-b",
+      "example": "curl -b 'session=abc123' https://example.com",
+      "tags": ["cookies"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to save response cookies to a file (a cookie jar).",
+      "answer": "-c",
+      "example": "curl -c cookies.txt https://example.com",
+      "tags": ["cookies"],
+      "source": "hand"
+    },
+    {
+      "type": "multiple_choice",
+      "prompt": "Which flag uploads a file as multipart/form-data?",
+      "answer": "-F, --form",
+      "choices": ["-F, --form", "-d, --data", "-T, --upload-file", "-o, --output"],
+      "example": "curl -F 'file=@photo.jpg' https://example.com/upload",
+      "tags": ["upload", "forms"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to upload a local file's raw contents via PUT.",
+      "answer": "-T",
+      "example": "curl -T localfile.txt https://example.com/upload",
+      "tags": ["upload"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to print extra info (like HTTP status code or total time) after a transfer, via a format string.",
+      "answer": "-w",
+      "example": "curl -w '%{http_code}\\n' -o /dev/null -s https://example.com",
+      "tags": ["output", "scripting"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to route the request through a proxy.",
+      "answer": "-x",
+      "example": "curl -x http://127.0.0.1:8080 https://example.com",
+      "tags": ["proxy"],
+      "source": "hand"
+    },
+    {
+      "type": "multiple_choice",
+      "prompt": "Which flag sets the maximum time in seconds the whole operation is allowed to take?",
+      "answer": "-m, --max-time",
+      "choices": ["-m, --max-time", "--connect-timeout", "-C, --continue-at", "-w, --write-out"],
+      "example": "curl -m 10 https://example.com",
+      "tags": ["timeouts"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to request transfer using a compressed encoding and auto-decompress the response.",
+      "answer": "--compressed",
+      "example": "curl --compressed https://example.com",
+      "tags": ["encoding"],
+      "source": "hand"
+    },
+    {
+      "type": "free_response",
+      "prompt": "Construct a curl command that follows redirects, is silent (no progress meter), and saves the output to out.html.",
+      "answer": "curl -L -s -o out.html https://example.com",
+      "tags": ["scenario"],
+      "source": "hand"
+    },
+    {
+      "type": "free_response",
+      "prompt": "Construct a curl command that sends a JSON POST body {\"name\":\"bob\"} to https://example.com/api with the correct Content-Type header.",
+      "answer": "curl -X POST -H 'Content-Type: application/json' -d '{\"name\":\"bob\"}' https://example.com/api",
+      "tags": ["scenario", "post"],
+      "source": "hand"
+    },
+    {
+      "type": "free_response",
+      "prompt": "Construct a curl command that authenticates with basic auth (user 'admin', password 'hunter2') against an insecure self-signed HTTPS endpoint.",
+      "answer": "curl -k -u admin:hunter2 https://example.com",
+      "tags": ["scenario", "auth", "tls"],
+      "source": "hand"
+    }
+  ]
+}

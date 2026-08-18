@@ -1,0 +1,203 @@
+{
+  "slug": "nmap",
+  "title": "nmap",
+  "description": "Core nmap scan types, flags, and command construction.",
+  "source": "ported",
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "prompt": "Which flag runs a TCP SYN ('half-open') scan?",
+      "answer": "-sS",
+      "choices": ["-sS", "-sT", "-sU", "-sV"],
+      "example": "nmap -sS 192.168.1.1",
+      "tags": ["scan-types"],
+      "source": "hand"
+    },
+    {
+      "type": "multiple_choice",
+      "prompt": "Which flag runs a full TCP connect() scan (no raw packet privileges needed)?",
+      "answer": "-sT",
+      "choices": ["-sT", "-sS", "-sn", "-sV"],
+      "example": "nmap -sT 192.168.1.1",
+      "tags": ["scan-types"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag for a UDP port scan.",
+      "answer": "-sU",
+      "example": "nmap -sU 192.168.1.1",
+      "tags": ["scan-types"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to enable service/version detection on open ports.",
+      "answer": "-sV",
+      "example": "nmap -sV 192.168.1.1",
+      "tags": ["detection"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to enable OS detection.",
+      "answer": "-O",
+      "example": "nmap -O 192.168.1.1",
+      "tags": ["detection"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to specify which port(s) to scan.",
+      "answer": "-p",
+      "example": "nmap -p 22,80,443 192.168.1.1",
+      "tags": ["ports"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Port specification that scans all 65535 TCP ports.",
+      "answer": "-p-",
+      "example": "nmap -p- 192.168.1.1",
+      "tags": ["ports"],
+      "source": "hand"
+    },
+    {
+      "type": "multiple_choice",
+      "prompt": "Which flag enables OS detection, version detection, script scanning, and traceroute all at once?",
+      "answer": "-A",
+      "choices": ["-A", "-T4", "-v", "-sC"],
+      "example": "nmap -A 192.168.1.1",
+      "tags": ["aggressive"],
+      "source": "hand"
+    },
+    {
+      "type": "multiple_choice",
+      "prompt": "Which flag skips host discovery and treats every target as online?",
+      "answer": "-Pn",
+      "choices": ["-Pn", "-sn", "-n", "-f"],
+      "example": "nmap -Pn 192.168.1.1",
+      "tags": ["host-discovery"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag for a 'ping scan' that only checks which hosts are up, without port scanning.",
+      "answer": "-sn",
+      "example": "nmap -sn 192.168.1.0/24",
+      "tags": ["host-discovery"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to set the timing template to 'Aggressive' (faster scan).",
+      "answer": "-T4",
+      "example": "nmap -T4 192.168.1.1",
+      "tags": ["timing"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to disable reverse DNS resolution during a scan.",
+      "answer": "-n",
+      "example": "nmap -n 192.168.1.1",
+      "tags": ["dns"],
+      "source": "hand"
+    },
+    {
+      "type": "multiple_choice",
+      "prompt": "Which flag saves scan results in nmap's normal, human-readable output format to a file?",
+      "answer": "-oN",
+      "choices": ["-oN", "-oX", "-oG", "-oA"],
+      "example": "nmap -oN scan.txt 192.168.1.1",
+      "tags": ["output"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to save scan results as XML.",
+      "answer": "-oX",
+      "example": "nmap -oX scan.xml 192.168.1.1",
+      "tags": ["output"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to save scan results in a greppable, one-line-per-host format.",
+      "answer": "-oG",
+      "example": "nmap -oG scan.gnmap 192.168.1.1",
+      "tags": ["output"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag that saves output in all major formats at once (normal, XML, and grepable).",
+      "answer": "-oA",
+      "example": "nmap -oA scan_basename 192.168.1.1",
+      "tags": ["output"],
+      "source": "hand"
+    },
+    {
+      "type": "multiple_choice",
+      "prompt": "Which flag runs nmap's default set of Nmap Scripting Engine (NSE) scripts?",
+      "answer": "-sC",
+      "choices": ["-sC", "--script", "-A", "-sV"],
+      "example": "nmap -sC 192.168.1.1",
+      "tags": ["nse"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to run one or more specific NSE scripts by name.",
+      "answer": "--script",
+      "example": "nmap --script http-title 192.168.1.1",
+      "tags": ["nse"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to scan only the N most common ports (a fast scan).",
+      "answer": "-F",
+      "example": "nmap -F 192.168.1.1",
+      "tags": ["ports", "speed"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to fragment probe packets to make detection/filtering harder.",
+      "answer": "-f",
+      "example": "nmap -f 192.168.1.1",
+      "tags": ["evasion"],
+      "source": "hand"
+    },
+    {
+      "type": "short_answer",
+      "prompt": "Flag to scan using IPv6 addresses.",
+      "answer": "-6",
+      "example": "nmap -6 2001:db8::1",
+      "tags": ["ipv6"],
+      "source": "hand"
+    },
+    {
+      "type": "free_response",
+      "prompt": "Construct an nmap command that runs a SYN scan with service version detection against all 65535 TCP ports on 10.0.0.5, saving normal-format output to results.txt.",
+      "answer": "nmap -sS -sV -p- -oN results.txt 10.0.0.5",
+      "tags": ["scenario"],
+      "source": "hand"
+    },
+    {
+      "type": "free_response",
+      "prompt": "Construct an nmap command that discovers which hosts are up on the 192.168.1.0/24 subnet without port-scanning them.",
+      "answer": "nmap -sn 192.168.1.0/24",
+      "tags": ["scenario", "host-discovery"],
+      "source": "hand"
+    },
+    {
+      "type": "free_response",
+      "prompt": "Construct an nmap command that runs an aggressive scan (-A) at the fastest timing template against a host that is known to be up (skip host discovery).",
+      "answer": "nmap -A -T4 -Pn 192.168.1.1",
+      "tags": ["scenario"],
+      "source": "hand"
+    }
+  ]
+}
