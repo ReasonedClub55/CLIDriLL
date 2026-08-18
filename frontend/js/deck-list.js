@@ -38,6 +38,7 @@ function deckCardHtml(deck) {
       <div class="deck-card-actions">
         <a class="button" href="#/study/${deck.id}">Study</a>
         <a class="button secondary" href="#/flashcards/${deck.id}">Flashcards</a>
+        <a class="button secondary" href="#/match/${deck.id}">Match</a>
         <a class="button secondary" href="#/decks/${deck.id}/edit">Edit</a>
       </div>
     </article>

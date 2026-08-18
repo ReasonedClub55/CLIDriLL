@@ -21,6 +21,8 @@ async function router() {
       await renderQuiz(appEl, Number(id));
     } else if (view === "flashcards" && id) {
       await renderFlashcards(appEl, Number(id));
+    } else if (view === "match" && id) {
+      await renderMatch(appEl, Number(id));
     } else {
       appEl.innerHTML = '<p>Not found. <a href="#/decks">Back to decks</a></p>';
     }
