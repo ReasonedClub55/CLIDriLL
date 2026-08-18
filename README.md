@@ -168,12 +168,9 @@ docker compose up
 
 ---
 
+## Project docs
+- [`docs/prd-v1-html.md`](docs/prd-v1-html.md) — PRD for the v1 plain-HTML edition.
+- [`docs/prd-v2-docker.md`](docs/prd-v2-docker.md) — PRD for the v2 Dockerized, man-page-sourced edition.
+
 ## License
 This repository includes a LICENSE file. See LICENSE for details.
-
----
-
-If you'd like, I can:
-- Commit this README as a new `README.md` in the repo,
-- Or produce a trimmed README that focuses only on v2 (Dockerized) or only on v1 (no-build),
-- Or generate a starter `data.js` seed for v1 or a minimal `docker-compose.yml` + `Dockerfile` skeleton for v2.

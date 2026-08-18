@@ -1,0 +1,23 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Python (v2 man-page generator)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node (only if the v2 static server ends up using it)
+node_modules/
+
+# v2 build output — generated at Docker image build time, not hand-authored
+v2/app/generated-items.json
+
+# Logs
+*.log
