@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Validate content, run backend tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # 3.12 matches the Dockerfile base image (python:3.12-slim).
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      # Same validation that gates seeding and every API write; catches a
+      # malformed deck file before it can fail startup.
+      - run: python scripts/validate_content.py
+
+      # `python -m` puts the repo root on sys.path so `import app` resolves.
+      - run: python -m pytest tests/
