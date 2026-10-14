@@ -43,6 +43,11 @@ def _get_session_or_404(db: Session, session_id: int) -> StudySession:
     return session
 
 
+def _require_active_session(session: StudySession) -> None:
+    if session.finished_at is not None:
+        raise HTTPException(status.HTTP_409_CONFLICT, "study session is already finished")
+
+
 @router.post("/sessions", response_model=StudySessionOut, status_code=status.HTTP_201_CREATED)
 def start_session(payload: StudySessionCreate, db: Session = Depends(get_db)):
     if db.get(Deck, payload.deck_id) is None:
@@ -62,6 +67,7 @@ def get_session(session_id: int, db: Session = Depends(get_db)):
 @router.get("/sessions/{session_id}/next", response_model=QuestionOut | None)
 def next_question(session_id: int, db: Session = Depends(get_db)):
     session = _get_session_or_404(db, session_id)
+    _require_active_session(session)
     questions = db.scalars(
         select(Question)
         .where(Question.deck_id == session.deck_id)
@@ -79,6 +85,7 @@ def next_question(session_id: int, db: Session = Depends(get_db)):
 @router.post("/sessions/{session_id}/answer", response_model=ProgressOut)
 def submit_answer(session_id: int, payload: AnswerSubmit, db: Session = Depends(get_db)):
     session = _get_session_or_404(db, session_id)
+    _require_active_session(session)
     question = db.get(Question, payload.question_id)
     if question is None or question.deck_id != session.deck_id:
         raise HTTPException(
@@ -117,6 +124,8 @@ def submit_answer(session_id: int, payload: AnswerSubmit, db: Session = Depends(
 @router.post("/sessions/{session_id}/finish", response_model=StudySessionOut)
 def finish_session(session_id: int, db: Session = Depends(get_db)):
     session = _get_session_or_404(db, session_id)
+    if session.finished_at is not None:
+        return session
     session.finished_at = utcnow()
     db.commit()
     db.refresh(session)

@@ -112,6 +112,10 @@ touches the database or duplicates validation logic itself.
 | `POST /api/study/sessions/{id}/finish` | End the session |
 | `GET /api/study/sessions/{id}` | Session state (for the summary screen) |
 
+After a session is finished, requesting another question or submitting an
+answer returns `409 Conflict`; its scores and question progress stay as
+recorded. Finishing it again is safe and preserves the original finish time.
+
 ## Architecture
 
 ```
