@@ -1,5 +1,11 @@
 import uuid
 
+import pytest
+
+from app.database import SessionLocal
+from app.models import Progress
+from app.schemas import ProgressOut
+
 
 def _slug(prefix: str) -> str:
     return f"{prefix}-{uuid.uuid4().hex[:8]}"
@@ -87,3 +93,55 @@ def test_finish_session_sets_finished_at(client):
     finished = client.post(f"/api/study/sessions/{session['id']}/finish")
     assert finished.status_code == 200
     assert finished.json()["finished_at"] is not None
+
+
+@pytest.mark.parametrize("correct", [True, False])
+def test_finished_session_rejects_answers_without_changing_progress(client, correct):
+    deck, question = _make_deck_with_question(client)
+    session = client.post("/api/study/sessions", json={"deck_id": deck["id"]}).json()
+    sid = session["id"]
+    answer = {"question_id": question["id"], "correct": True}
+    before = client.post(f"/api/study/sessions/{sid}/answer", json=answer).json()
+    finished = client.post(f"/api/study/sessions/{sid}/finish").json()
+
+    response = client.post(
+        f"/api/study/sessions/{sid}/answer",
+        json={"question_id": question["id"], "correct": correct},
+    )
+    assert response.status_code == 409
+    assert client.get(f"/api/study/sessions/{sid}").json() == finished
+
+    # Verify the persistent question history, including last_seen_at, directly
+    # in the same disposable test database used by the API.
+    with SessionLocal() as db:
+        progress = db.get(Progress, before["id"])
+        assert ProgressOut.model_validate(progress).model_dump(mode="json") == before
+
+
+def test_finished_session_does_not_offer_another_question(client):
+    deck, _ = _make_deck_with_question(client)
+    session = client.post("/api/study/sessions", json={"deck_id": deck["id"]}).json()
+    client.post(f"/api/study/sessions/{session['id']}/finish")
+    assert client.get(f"/api/study/sessions/{session['id']}/next").status_code == 409
+
+
+def test_finishing_again_preserves_original_finish_time(client):
+    deck, _ = _make_deck_with_question(client)
+    session = client.post("/api/study/sessions", json={"deck_id": deck["id"]}).json()
+    url = f"/api/study/sessions/{session['id']}/finish"
+    first = client.post(url)
+    second = client.post(url)
+    assert first.status_code == second.status_code == 200
+    assert first.json() == second.json()
+
+
+@pytest.mark.parametrize("action", ["next", "answer", "finish"])
+def test_missing_session_still_returns_404(client, action):
+    url = f"/api/study/sessions/999999/{action}"
+    if action == "next":
+        response = client.get(url)
+    elif action == "answer":
+        response = client.post(url, json={"question_id": 999999, "correct": True})
+    else:
+        response = client.post(url)
+    assert response.status_code == 404
