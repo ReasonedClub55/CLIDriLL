@@ -78,17 +78,30 @@ for all env vars: `DATABASE_URL`, `HOST`, `PORT`, `CONTENT_DECKS_DIR`,
 
 ## Adding a new deck
 
-Drop a new validated JSON file into `content/decks/` and restart the
-container (or rerun `app/seed.py`'s startup path) — no code changes needed.
-Validate it first:
+Write a deck as a JSON file in the `content/decks/` shape and validate it
+first:
 
 ```bash
 python scripts/validate_content.py
 ```
 
-This runs the same validation (`app/content_validation.py`) that gates
-content at seed time and every deck/question write through the API, so a
-malformed file is caught before it ever reaches the app. See `plan.md` §5–7
+Then get it into the app. Which way depends on whether the database already
+has decks:
+
+- **Existing install** — use **Import JSON** on the deck list page. It
+  creates a *new* deck from the file; a slug that already exists is rejected
+  with a 409, and it never updates an existing deck.
+- **Fresh database** — files in `content/decks/` are loaded on first boot only.
+  Seeding is skipped whenever the database already contains any deck, so
+  dropping a file into `content/decks/` and restarting an existing install
+  does **not** pick it up. That is deliberate: it keeps your progress and
+  edits from being overwritten. Resetting to re-seed from the files
+  (`docker compose down -v`, which removes the `clidrill-data` volume) also
+  deletes all progress and any decks you created or edited.
+
+The validator runs the same validation (`app/content_validation.py`) that
+gates content at seed time and every deck/question write through the API, so
+a malformed file is caught before it ever reaches the app. See `plan.md` §5–7
 for the deck/question JSON shape and per-type rules (e.g. `multiple_choice`
 needs ≥2 `choices` including the answer; `short_answer`/`free_response` must
 not have `choices`).
