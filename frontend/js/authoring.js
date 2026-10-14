@@ -107,10 +107,13 @@ function wireEditorHandlers(container, state) {
     const form = event.currentTarget;
     const feedback = form.querySelector("#deck-feedback");
     try {
-      state.deck = await api.updateDeck(state.deck.id, {
+      const updated = await api.updateDeck(state.deck.id, {
         title: form.querySelector("#deck-title").value.trim(),
         description: form.querySelector("#deck-description").value.trim() || null,
       });
+      // PATCH returns deck metadata only; keep the loaded questions for export
+      // and subsequent editor renders.
+      state.deck = { ...state.deck, ...updated };
       feedback.textContent = "Saved.";
       feedback.className = "form-feedback correct";
     } catch (err) {
