@@ -102,6 +102,7 @@ touches the database or duplicates validation logic itself.
 |---|---|
 | `GET /api/decks` | List decks |
 | `POST /api/decks` | Create a deck |
+| `POST /api/decks/import` | Create a deck and all its questions from a deck-file body, in one transaction (409 if the slug exists; 422 writes nothing) |
 | `GET /api/decks/{id}` | Deck + its questions |
 | `PATCH /api/decks/{id}` / `DELETE /api/decks/{id}` | Edit / delete a deck |
 | `POST /api/decks/{id}/questions` | Add a question to a deck |

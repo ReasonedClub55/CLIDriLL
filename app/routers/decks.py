@@ -4,13 +4,14 @@ Question create/update payloads are validated through
 content_validation.QuestionIn -- the same per-type rules (multiple_choice
 needs >=2 choices, short_answer/free_response must not have choices) that
 gate content/decks/*.json at seed time, so hand-authored and API-authored
-questions can never diverge.
+questions can never diverge. POST /api/decks/import takes a whole deck file
+and validates it with content_validation.DeckFile, the model the seeder uses.
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.content_validation import QuestionIn
+from app.content_validation import DeckFile, QuestionIn
 from app.database import get_db
 from app.models import Deck, Question
 from app.schemas import (
@@ -21,6 +22,7 @@ from app.schemas import (
     QuestionOut,
     QuestionUpdate,
 )
+from app.seed import deck_from_file
 
 router = APIRouter(prefix="/api/decks", tags=["decks"])
 
@@ -59,6 +61,23 @@ def create_deck(payload: DeckCreate, db: Session = Depends(get_db)):
     if _slug_taken(db, payload.slug):
         raise HTTPException(status.HTTP_409_CONFLICT, f"slug '{payload.slug}' already exists")
     deck = Deck(**payload.model_dump())
+    db.add(deck)
+    db.commit()
+    db.refresh(deck)
+    return deck
+
+
+@router.post(
+    "/import", response_model=DeckWithQuestionsOut, status_code=status.HTTP_201_CREATED
+)
+def import_deck(payload: DeckFile, db: Session = Depends(get_db)):
+    """Create a deck and all its questions from a content/decks/<slug>.json-
+    shaped body in one transaction. FastAPI validates the whole file before
+    this runs, so a bad question returns 422 with nothing written -- no
+    half-imported deck left holding the slug."""
+    if _slug_taken(db, payload.slug):
+        raise HTTPException(status.HTTP_409_CONFLICT, f"slug '{payload.slug}' already exists")
+    deck = deck_from_file(payload)
     db.add(deck)
     db.commit()
     db.refresh(deck)
