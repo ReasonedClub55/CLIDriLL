@@ -1,4 +1,8 @@
+import json
 import uuid
+from pathlib import Path
+
+DECKS_DIR = Path(__file__).resolve().parent.parent / "content" / "decks"
 
 
 def _slug(prefix: str) -> str:
@@ -102,3 +106,72 @@ def test_update_question_rejects_rule_violation(client):
         json={"type": "multiple_choice"},
     )
     assert resp.status_code == 422
+
+
+def _deck_file(slug: str, questions: list[dict]) -> dict:
+    return {
+        "slug": slug,
+        "title": "Imported",
+        "description": "from a file",
+        "source": "authored",
+        "questions": questions,
+    }
+
+
+_GOOD_QUESTIONS = [
+    {"type": "short_answer", "prompt": "flag for verbose?", "answer": "-v"},
+    {
+        "type": "multiple_choice",
+        "prompt": "pick one",
+        "answer": "b",
+        "choices": ["a", "b"],
+        "tags": ["t"],
+    },
+]
+
+
+def test_import_deck_creates_deck_and_questions(client):
+    slug = _slug("import")
+    resp = client.post("/api/decks/import", json=_deck_file(slug, _GOOD_QUESTIONS))
+    assert resp.status_code == 201
+    deck = resp.json()
+    assert deck["slug"] == slug
+    assert deck["description"] == "from a file"
+    assert [q["prompt"] for q in deck["questions"]] == ["flag for verbose?", "pick one"]
+    assert deck["questions"][1]["choices"] == ["a", "b"]
+
+    got = client.get(f"/api/decks/{deck['id']}").json()
+    assert len(got["questions"]) == 2
+
+
+def test_import_deck_with_bad_question_writes_nothing(client):
+    slug = _slug("import-bad")
+    bad = _GOOD_QUESTIONS + [
+        {"type": "multiple_choice", "prompt": "no choices", "answer": "x"},
+    ]
+    resp = client.post("/api/decks/import", json=_deck_file(slug, bad))
+    assert resp.status_code == 422
+    assert slug not in {d["slug"] for d in client.get("/api/decks").json()}
+
+    # The slug stays free, so the corrected file imports cleanly.
+    retry = client.post("/api/decks/import", json=_deck_file(slug, _GOOD_QUESTIONS))
+    assert retry.status_code == 201
+
+
+def test_import_deck_duplicate_slug_conflicts(client):
+    slug = _slug("import-dupe")
+    first = client.post("/api/decks/import", json=_deck_file(slug, _GOOD_QUESTIONS))
+    assert first.status_code == 201
+    dupe = client.post("/api/decks/import", json=_deck_file(slug, _GOOD_QUESTIONS))
+    assert dupe.status_code == 409
+    assert [d["slug"] for d in client.get("/api/decks").json()].count(slug) == 1
+
+
+def test_import_deck_round_trips_a_starter_deck(client):
+    """A deck exported from the app (same shape as content/decks/*.json)
+    imports under a new slug with every question intact."""
+    data = json.loads((DECKS_DIR / "curl.json").read_text(encoding="utf-8"))
+    data["slug"] = _slug("curl-copy")
+    resp = client.post("/api/decks/import", json=data)
+    assert resp.status_code == 201
+    assert len(resp.json()["questions"]) == len(data["questions"])
